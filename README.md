@@ -19,6 +19,8 @@ This script will create an docer image tagged with ibmmq-amazon:latest
 
 ibmmq-amazon:latest can be started with run.sh script.
 
+Please note your local /tmp/mq folder will be mounted to the image
+
 ## Why Amazon Linux
 
 IBM provides its own Docker Images for IBM MQ.
