@@ -1,0 +1,36 @@
+FROM amazonlinux:latest
+
+RUN yum install tar gzip procps which sudo rpm-build -y
+
+# Copy files to image
+COPY IBM_MQ_9.2.0_LINUX_X86-64_TRIAL.tar.gz .
+RUN tar xvf IBM_MQ_9.2.0_LINUX_X86-64_TRIAL.tar.gz 
+RUN rm IBM_MQ_9.2.0_LINUX_X86-64_TRIAL.tar.gz
+
+## Installation
+# https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.2.0/com.ibm.mq.ins.doc/q008640_.htm
+WORKDIR MQServer 
+RUN ./crtmqpkg mqm
+
+WORKDIR /var/tmp/mq_rpms/mqm/x86_64/
+RUN rpm -ivh MQSeries*.rpm
+ 
+# Accept License
+# https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.2.0/com.ibm.mq.ins.doc/q133540_.htm#q133540_
+WORKDIR /opt/mqm/bin/
+RUN ./mqlicense <<< "1"
+
+# Verification
+# https://www.ibm.com/support/knowledgecenter/SSFKSJ_9.2.0/com.ibm.mq.ins.doc/q009243_.htm
+RUN sudo -u mqm ./dspmqver
+
+EXPOSE 9443 1414 9157
+
+# Install Queue Manager
+COPY install_mq.sh /opt/mqm/bin/install_mq.sh
+
+WORKDIR /opt/mqm/bin/
+
+CMD ["su", "-", "mqm", "-c", "/opt/mqm/bin/install_mq.sh"]
+
+
